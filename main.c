@@ -74,68 +74,24 @@ size_t word_count(String_View content, Word needle)
     return count;
 }
 
+#define CACHE_NONE    0
+#define CACHE_HASH_LL 1
+#define CACHE_LL      2
+#define CACHE_PRECALC 3
+
 #define CACHE_CAP (1024 * 3)
+#define CACHE_IMPL CACHE_NONE
 
-// #define NOCACHE
-
-#ifdef NOCACHE
-#define cache_get(word, freq) false
-#define cache_put(word, freq) do {} while(0)
-#define cache_cleanup() do {} while(0)
+#if CACHE_IMPL == CACHE_NONE
+#include "cache_none.c"
+#elif CACHE_IMPL == CACHE_HASH_LL
+#include "cache_hash_ll.c"
+#elif CACHE_IMPL == CACHE_LL
+#include "cache_ll.c"
+#elif CACHE_IMPL == CACHE_PRECALC
+#include "cache_precalc.c"
 #else
-
-typedef struct {
-    ptrdiff_t prev;
-    ptrdiff_t next;
-    Word key;
-} Node;
-
-typedef struct {
-    Word key;
-    size_t value;
-    ptrdiff_t queue_idx;
-} Item;
-
-Node *queue = NULL;
-Item *table = NULL;
-
-bool cache_get(Word key, size_t *value)
-{
-    ptrdiff_t index = hmgeti(table, key);
-    if (index >= 0) {
-        if (value) *value = table[index].value;
-        llmovefront(queue, table[index].queue_idx);
-        return true;
-    }
-    return false;
-}
-
-void cache_put(Word key, size_t value)
-{
-    if (llcount(queue) < CACHE_CAP) {
-        llpushfront(queue);
-    } else {
-        hmdel(table, queue[llback(queue)].key);
-        llmovefront(queue, llback(queue));
-    }
-
-    queue[llfront(queue)].key = key;
-
-    Item item = {
-        .key = key,
-        .value = value,
-        .queue_idx = llfront(queue),
-    };
-
-    hmputs(table, item);
-}
-
-void cache_cleanup(void)
-{
-    llfree(queue);
-    hmfree(table);
-}
-
+#error "Unknown cache implementation"
 #endif
 
 int main(int argc, char **argv)
@@ -170,7 +126,11 @@ int main(int argc, char **argv)
         exit(1);
     }
 
+    fprintf(stderr, "Cache Implementation: " CACHE_NAME "\n");
+
     String_View content = sv_from_parts(content_data, content_size);
+    cache_init(content);
+
     while (content.count > 0) {
         String_View line = sv_chop_by_delim(&content, '\n');
         while (line.count > 0) {

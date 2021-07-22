@@ -12,7 +12,7 @@ const char *cc(void)
 int main(int argc, char **argv)
 {
     GO_REBUILD_URSELF(argc, argv);
-    CMD(cc(), CFLAGS, "-o", "lru", "main.c");
+    CMD(cc(), CFLAGS, "-o", "lru", "src/main.c");
 
     if (argc > 1) {
         if (strcmp(argv[1], "run") == 0) {

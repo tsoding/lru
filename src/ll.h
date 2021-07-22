@@ -61,26 +61,26 @@
 //
 // Function interface (some of them are actually macros):
 //
-//   void llpushfront(Node *xs)
+//   void llpushfront(Node *xs) O(1) amort
 //     Push a new node at the front of the Linked-List.
 //     You can access that node via xs[llfront(xs)].
 //     Pusing a new value looks like this:
 //       llpushfront(xs);
 //       xs[llfront(xs)].value = 69;
 //
-//   void llmovefront(Node *xs, ptrdiff_t index)
+//   void llmovefront(Node *xs, ptrdiff_t index) O(1)
 //     Move the node refered by the index to the front of the Linked-List
 //
-//   size_t llcount(Node *xs)
+//   size_t llcount(Node *xs) O(1)
 //     Amount of the elements in the linked list
 //
-//   ptrdiff_t llfront(Node *xs)
+//   ptrdiff_t llfront(Node *xs) O(1)
 //     Index of the front element
 //
-//   ptrdiff_t llback(Node *xs)
+//   ptrdiff_t llback(Node *xs) O(1)
 //     Index of the back element
 //
-//   void llfree(Node *xs)
+//   void llfree(Node *xs) ???
 //     Free all of the memory allocated by the list
 //
 //  Compile-Time options:
